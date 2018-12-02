@@ -1,10 +1,13 @@
 package me.wieku.noteserv.database;
 
+import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
@@ -14,6 +17,16 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     @Override
     public Note getNewestNote(long noteId) {
         return em.find(Note.class, noteId);
+    }
+
+    @Override
+    public List<Note> getHistory(long noteId) {
+        List<Note> notes = new ArrayList<>();
+        AuditReader reader = AuditReaderFactory.get(em);
+        reader.getRevisions(Note.class, noteId).forEach(number ->
+            notes.add(reader.find(Note.class, noteId, number))
+        );
+        return notes;
     }
 
     @Override
