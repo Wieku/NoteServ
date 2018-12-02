@@ -1,5 +1,7 @@
 package me.wieku.noteserv.database;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
@@ -17,11 +19,12 @@ public class Note {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private long id;
+
+    private Long id;
 
     @GeneratedValue
     @RevisionNumber
-    private long revisionId;
+    private Long revisionId;
 
     @CreationTimestamp
     private LocalDateTime creationDate;
@@ -31,6 +34,8 @@ public class Note {
 
     private String title;
     private String content;
+
+    public Note(){}
 
     public Note(String title, String content) {
         this.title = title;
@@ -45,8 +50,12 @@ public class Note {
         this.content = content;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public Long getRevisionId() {
+        return revisionId;
     }
 
     public LocalDateTime getCreationDate() {
@@ -55,5 +64,13 @@ public class Note {
 
     public LocalDateTime getModificationDate() {
         return updateDate;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

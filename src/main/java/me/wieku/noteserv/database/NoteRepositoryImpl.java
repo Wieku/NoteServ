@@ -11,7 +11,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     public Note getNewestNote(long noteId) {
-        return null;
+        return em.find(Note.class, noteId);
     }
 
     @Override

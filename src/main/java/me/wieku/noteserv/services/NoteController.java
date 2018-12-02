@@ -5,6 +5,7 @@ import me.wieku.noteserv.database.NoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,13 @@ public class NoteController {
         Note note = new Note(title, content);
         repository.addNote(note);
         return ResponseEntity.ok(note.getId());
+    }
+
+    @RequestMapping("/get/{noteId}")
+    public ResponseEntity<Object> getNote(@PathVariable Long noteId) {
+        Note note = repository.getNewestNote(noteId);
+        System.out.println(note);
+        return ResponseEntity.ok(note);
     }
 
 }
