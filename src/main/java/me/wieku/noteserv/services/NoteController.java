@@ -26,6 +26,16 @@ public class NoteController {
         return ResponseEntity.ok(note.getId());
     }
 
+    @RequestMapping("/update/{noteId}")
+    public ResponseEntity<Object> updateNote(@PathVariable Long noteId, @RequestParam(value="title") String title, @RequestParam(value="content") String content) {
+        if (title.length() == 0 || content.length() == 0 || noteId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Note note = new Note(title, content);
+        repository.updateNote(noteId, note);
+        return ResponseEntity.ok(null);
+    }
+
     @RequestMapping("/get/{noteId}")
     public ResponseEntity<Object> getNote(@PathVariable Long noteId) {
         Note note = repository.getNewestNote(noteId);

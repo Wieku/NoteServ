@@ -27,8 +27,13 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     }
 
     @Override
+    @Transactional
     public void updateNote(long noteId, Note note) {
+        Note mNote = em.find(Note.class, noteId);
+        mNote.setTitle(note.getTitle());
+        mNote.setContent(note.getContent());
 
+        em.flush();
     }
 
     @Override

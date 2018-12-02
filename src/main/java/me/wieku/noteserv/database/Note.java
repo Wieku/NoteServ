@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,12 +20,11 @@ public class Note {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-
     private Long id;
 
-    @GeneratedValue
+    /*@GeneratedValue
     @RevisionNumber
-    private Long revisionId;
+    private Long revisionId;*/
 
     @CreationTimestamp
     private LocalDateTime creationDate;
@@ -54,9 +54,9 @@ public class Note {
         return id;
     }
 
-    public Long getRevisionId() {
+   /* public Long getRevisionId() {
         return revisionId;
-    }
+    }*/
 
     public LocalDateTime getCreationDate() {
         return creationDate;
