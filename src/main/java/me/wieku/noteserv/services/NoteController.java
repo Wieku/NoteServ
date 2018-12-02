@@ -36,10 +36,19 @@ public class NoteController {
         return ResponseEntity.ok(null);
     }
 
-    @RequestMapping("/get/{noteId}")
-    public ResponseEntity<Object> getNote(@PathVariable Long noteId) {
-        Note note = repository.getNewestNote(noteId);
-        System.out.println(note);
+    @RequestMapping({"/get/{noteId}", "/get/{noteId}/{revisionId}"})
+    public ResponseEntity<Object> getNote(@PathVariable Long noteId, @PathVariable(required = false) Integer revisionId) {
+        if (noteId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        Note note;
+
+        if (revisionId == null) {
+            note = repository.getNewestNote(noteId);
+        } else {
+            note = repository.getNoteRevision(noteId, revisionId);
+        }
+
         return ResponseEntity.ok(note);
     }
 

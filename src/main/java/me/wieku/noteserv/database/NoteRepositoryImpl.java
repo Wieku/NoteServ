@@ -1,5 +1,7 @@
 package me.wieku.noteserv.database;
 
+import org.hibernate.envers.AuditReaderFactory;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -15,8 +17,9 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     }
 
     @Override
-    public Note getNoteRevision(long noteId, long revision) {
-        return null;
+    public Note getNoteRevision(long noteId, int revision) {
+        Note note = AuditReaderFactory.get(em).find(Note.class, noteId, revision);
+        return note;
     }
 
     @Override
