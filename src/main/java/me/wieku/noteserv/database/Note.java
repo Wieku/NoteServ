@@ -1,7 +1,6 @@
 package me.wieku.noteserv.database;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -15,7 +14,7 @@ import java.util.List;
 public class Note {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @CreationTimestamp
@@ -25,7 +24,10 @@ public class Note {
     @OrderBy("revision_number ASC")
     private List<NoteRevision> revisions = new ArrayList<>();
 
-    public Note(){}
+    private boolean removed = false;
+
+    public Note() {
+    }
 
     public Note(String title, String content) {
         addRevision(title, content);
@@ -39,6 +41,14 @@ public class Note {
         return revision;
     }
 
+    public void markAsRemoved() {
+        removed = true;
+    }
+
+    public boolean isRemoved() {
+        return removed;
+    }
+
     public Long getId() {
         return id;
     }
@@ -48,15 +58,15 @@ public class Note {
     }
 
     public LocalDateTime getModificationDate() {
-        return revisions.get(revisions.size()-1).getRevisionDate();
+        return revisions.get(revisions.size() - 1).getRevisionDate();
     }
 
     public String getTitle() {
-        return revisions.get(revisions.size()-1).getTitle();
+        return revisions.get(revisions.size() - 1).getTitle();
     }
 
     public String getContent() {
-        return revisions.get(revisions.size()-1).getContent();
+        return revisions.get(revisions.size() - 1).getContent();
     }
 
     public List<NoteRevision> getRevisions() {

@@ -12,7 +12,8 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     public Note getNewestNote(long noteId) {
-        return em.find(Note.class, noteId);
+        Note note = em.find(Note.class, noteId);
+        return note.isRemoved() ? null : note;
     }
 
     @Override
@@ -23,7 +24,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     @Override
     public NoteRevision getNoteRevision(long noteId, int revision) {
         Note note = em.find(Note.class, noteId);
-        if (note == null || revision < 0 || revision >= note.getRevisions().size()) {
+        if (note == null || note.isRemoved() || revision < 0 || revision >= note.getRevisions().size()) {
             return null;
         }
         return note.getRevisions().get(revision);
@@ -41,13 +42,13 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     public void updateNote(long noteId, NoteRevision note) {
         Note mNote = em.find(Note.class, noteId);
         mNote.addRevision(note.getTitle(), note.getContent());
-
         em.flush();
     }
 
     @Override
     @Transactional
     public void removeNote(long noteId) {
-        em.remove(em.find(Note.class, noteId));
+        em.find(Note.class, noteId).markAsRemoved();
+        em.flush();
     }
 }

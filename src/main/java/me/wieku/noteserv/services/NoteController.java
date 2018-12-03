@@ -21,7 +21,7 @@ public class NoteController {
     private NoteRepository repository;
 
     @RequestMapping("/create")
-    public ResponseEntity<Object> createNote(@RequestParam(value="title") String title, @RequestParam(value="content") String content) {
+    public ResponseEntity<Object> createNote(@RequestParam(value = "title") String title, @RequestParam(value = "content") String content) {
         if (title.length() == 0 || content.length() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -31,7 +31,7 @@ public class NoteController {
     }
 
     @RequestMapping("/update/{noteId}")
-    public ResponseEntity<Object> updateNote(@PathVariable Long noteId, @RequestParam(value="title") String title, @RequestParam(value="content") String content) {
+    public ResponseEntity<Object> updateNote(@PathVariable Long noteId, @RequestParam(value = "title") String title, @RequestParam(value = "content") String content) {
         if (title.length() == 0 || content.length() == 0 || noteId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }

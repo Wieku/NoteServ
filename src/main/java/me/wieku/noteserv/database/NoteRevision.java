@@ -1,6 +1,7 @@
 package me.wieku.noteserv.database;
 
 import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -24,7 +25,8 @@ public class NoteRevision {
     @JoinColumn(name = "note_id")
     private Note note;
 
-    public NoteRevision(){}
+    public NoteRevision() {
+    }
 
     public NoteRevision(String title, String content) {
         this.title = title;
