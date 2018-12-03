@@ -1,76 +1,66 @@
 package me.wieku.noteserv.database;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RevisionEntity;
-import org.hibernate.envers.RevisionNumber;
-import org.hibernate.envers.RevisionTimestamp;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
+@Entity(name = "Note")
+@Table(name = "notes")
 @EntityListeners(AuditingEntityListener.class)
-@Audited
 public class Note {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
-    /*@GeneratedValue
-    @RevisionNumber
-    private Long revisionId;*/
-
     @CreationTimestamp
     private LocalDateTime creationDate;
 
-    @UpdateTimestamp
-    private LocalDateTime updateDate;
-
-    private String title;
-    private String content;
+    @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
+    @OrderBy("revision_number ASC")
+    private List<NoteRevision> revisions = new ArrayList<>();
 
     public Note(){}
 
     public Note(String title, String content) {
-        this.title = title;
-        this.content = content;
+        addRevision(title, content);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+    public NoteRevision addRevision(String title, String content) {
+        NoteRevision revision = new NoteRevision(title, content);
+        revision.setRevisionNumber(revisions.size());
+        revision.setNote(this);
+        revisions.add(revision);
+        return revision;
     }
 
     public Long getId() {
         return id;
     }
 
-   /* public Long getRevisionId() {
-        return revisionId;
-    }*/
-
     public LocalDateTime getCreationDate() {
         return creationDate;
     }
 
     public LocalDateTime getModificationDate() {
-        return updateDate;
+        return revisions.get(revisions.size()-1).getRevisionDate();
     }
 
     public String getTitle() {
-        return title;
+        return revisions.get(revisions.size()-1).getTitle();
     }
 
     public String getContent() {
-        return content;
+        return revisions.get(revisions.size()-1).getContent();
     }
+
+    public List<NoteRevision> getRevisions() {
+        return revisions;
+    }
+
 }

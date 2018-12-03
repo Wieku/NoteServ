@@ -1,12 +1,8 @@
 package me.wieku.noteserv.database;
 
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
@@ -20,19 +16,17 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     }
 
     @Override
-    public List<Note> getHistory(long noteId) {
-        List<Note> notes = new ArrayList<>();
-        AuditReader reader = AuditReaderFactory.get(em);
-        reader.getRevisions(Note.class, noteId).forEach(number ->
-            notes.add(reader.find(Note.class, noteId, number))
-        );
-        return notes;
+    public List<NoteRevision> getHistory(long noteId) {
+        return em.find(Note.class, noteId).getRevisions();
     }
 
     @Override
-    public Note getNoteRevision(long noteId, int revision) {
-        Note note = AuditReaderFactory.get(em).find(Note.class, noteId, revision);
-        return note;
+    public NoteRevision getNoteRevision(long noteId, int revision) {
+        Note note = em.find(Note.class, noteId);
+        if (note == null || revision < 0 || revision >= note.getRevisions().size()) {
+            return null;
+        }
+        return note.getRevisions().get(revision);
     }
 
     @Override
@@ -44,16 +38,16 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     @Transactional
-    public void updateNote(long noteId, Note note) {
+    public void updateNote(long noteId, NoteRevision note) {
         Note mNote = em.find(Note.class, noteId);
-        mNote.setTitle(note.getTitle());
-        mNote.setContent(note.getContent());
+        mNote.addRevision(note.getTitle(), note.getContent());
 
         em.flush();
     }
 
     @Override
+    @Transactional
     public void removeNote(long noteId) {
-
+        em.remove(em.find(Note.class, noteId));
     }
 }

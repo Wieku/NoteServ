@@ -2,6 +2,8 @@ package me.wieku.noteserv.services;
 
 import me.wieku.noteserv.database.Note;
 import me.wieku.noteserv.database.NoteRepository;
+import me.wieku.noteserv.database.NoteRevision;
+import me.wieku.noteserv.view.NewestNote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,7 @@ public class NoteController {
         if (title.length() == 0 || content.length() == 0 || noteId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-        Note note = new Note(title, content);
+        NoteRevision note = new NoteRevision(title, content);
         repository.updateNote(noteId, note);
         return ResponseEntity.ok(null);
     }
@@ -43,9 +45,19 @@ public class NoteController {
         if (noteId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-        List<Note> notes = repository.getHistory(noteId);
+        List<NoteRevision> notes = repository.getHistory(noteId);
 
         return ResponseEntity.ok(notes);
+    }
+
+    @RequestMapping("/delete/{noteId}")
+    public ResponseEntity<Object> delete(@PathVariable Long noteId) {
+        if (noteId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        repository.removeNote(noteId);
+
+        return ResponseEntity.ok(null);
     }
 
     @RequestMapping({"/get/{noteId}", "/get/{noteId}/{revisionId}"})
@@ -53,15 +65,22 @@ public class NoteController {
         if (noteId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
-        Note note;
 
         if (revisionId == null) {
-            note = repository.getNewestNote(noteId);
+            Note note = repository.getNewestNote(noteId);
+            if (note == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            } else {
+                return ResponseEntity.ok(new NewestNote(note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate()));
+            }
         } else {
-            note = repository.getNoteRevision(noteId, revisionId);
+            NoteRevision revision = repository.getNoteRevision(noteId, revisionId);
+            if (revision == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            } else {
+                return ResponseEntity.ok(revision);
+            }
         }
-
-        return ResponseEntity.ok(note);
     }
 
 }
