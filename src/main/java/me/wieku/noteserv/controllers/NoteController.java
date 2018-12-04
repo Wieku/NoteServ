@@ -58,13 +58,13 @@ public class NoteController {
 
     @RequestMapping(value = "/notes/{noteId}/{revisionId}", method = RequestMethod.GET)
     public ResponseEntity<Object> getNote(@PathVariable UUID noteId, @PathVariable Integer revisionId) {
-        NoteRevision revision = repository.getNoteRevision(/*decoded[0]*/noteId, revisionId);
+        NoteRevision revision = repository.getNoteRevision(noteId, revisionId);
         return revision == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(revision);
     }
 
     @RequestMapping(value = "/notes/{noteId}/history", method = RequestMethod.GET)
     public ResponseEntity<Object> getHistory(@PathVariable UUID noteId) {
-        List<NoteRevision> notes = repository.getHistory(/*decoded[0]*/noteId);
+        List<NoteRevision> notes = repository.getHistory(noteId);
         return notes == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(notes);
     }
 

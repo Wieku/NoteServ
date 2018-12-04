@@ -4,7 +4,7 @@ It's a simple RESTful API to manage notes.
 ## Requirements
 The only additional requirement is a running PostgreSQL server.
 
-Server credentials are located in `./src/main/resources/application.properties`
+Database credentials and address are located in `./src/main/resources/application.properties`
 
 ## How to run the project
 `./gradlew bootRun`
@@ -15,9 +15,9 @@ Server credentials are located in `./src/main/resources/application.properties`
 |Description|curl command|
 |---|---|
 |Show all existing notes|`curl -i -X GET http://host:port/notes`|
-|Show the exact note|`curl -i -X GET http://host:port/notes/ABCD`|
-|Show note at revision|`curl -i -X GET http://host:port/notes/ABCD/3`|
-|Show note's history (including deleted notes)|`curl -i -X GET http://host:port/notes/ABCD/history`|
+|Show the exact note|`curl -i -X GET http://host:port/notes/{id}`|
+|Show note at revision|`curl -i -X GET http://host:port/notes/{id}/3`|
+|Show note's history (including deleted notes)|`curl -i -X GET http://host:port/notes/{id}/history`|
 
 ### Creating notes
 `curl -i -d "title=foo&content=bar" -X POST http://host:port/notes`
