@@ -25,69 +25,69 @@ public class NoteController {
     private Hashids hashids = new Hashids("67rbg8567GNFY", 4);
 
     @RequestMapping(value = "/notes", method = RequestMethod.POST)
-    public ResponseEntity<Object> createNote(@RequestParam(value = "title") String title, @RequestParam(value = "content") String content, UriComponentsBuilder b) {
+    public ResponseEntity<Object> createNote(@RequestParam(value = "title") String title, @RequestParam(value = "content") String content, UriComponentsBuilder builder) {
         if (title.length() == 0 || content.length() == 0) {
             return ResponseEntity.badRequest().build();
         }
+
         Note note = new Note(title, content);
         repository.addNote(note);
 
-        UriComponents c = b.path("/notes/{id}").buildAndExpand(hashids.encode(note.getId()));
-
-        return ResponseEntity.created(c.toUri()).build();
+        UriComponents components = builder.path("/notes/{id}").buildAndExpand(hashids.encode(note.getId()));
+        return ResponseEntity.created(components.toUri()).build();
     }
 
-    @RequestMapping(value = {"/notes"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/notes", method = RequestMethod.GET)
     public ResponseEntity<Object> getNotes() {
         List<NoteWithId> notes = repository.getAll().stream().map(note -> new NoteWithId(hashids.encode(note.getId()), note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate())).collect(Collectors.toList());
         return ResponseEntity.ok(notes);
     }
 
-    @RequestMapping(value = {"/notes/{noteId}", "/notes/{noteId}/{revisionId}"}, method = RequestMethod.GET)
-    public ResponseEntity<Object> getNote(@PathVariable String noteId, @PathVariable(required = false) Integer revisionId) {
-        long[] decoded;
-        if (noteId == null || (decoded = hashids.decode(noteId)).length == 0) {
+    @RequestMapping(value = "/notes/{noteId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getNote(@PathVariable String noteId) {
+        long[] decoded = hashids.decode(noteId);
+        if (decoded.length == 0) {
             return ResponseEntity.notFound().build();
         }
 
-        if (revisionId == null) {
-            Note note = repository.getNewestNote(decoded[0]);
-            if (note == null) {
-                return ResponseEntity.notFound().build();
-            } else {
-                return ResponseEntity.ok(new NewestNote(note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate()));
-            }
-        } else {
-            NoteRevision revision = repository.getNoteRevision(decoded[0], revisionId);
-            if (revision == null) {
-                return ResponseEntity.notFound().build();
-            } else {
-                return ResponseEntity.ok(revision);
-            }
-        }
+        Note note = repository.getNewestNote(decoded[0]);
+        return note == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(new NewestNote(note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate()));
     }
 
     @RequestMapping(value = "/notes/{noteId}", method = RequestMethod.PUT)
     public ResponseEntity<Object> updateNote(@PathVariable String noteId, @RequestParam(value = "title") String title, @RequestParam(value = "content") String content) {
-        long[] decoded;
-        if (title.length() == 0 || content.length() == 0 || noteId == null || (decoded = hashids.decode(noteId)).length == 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        long[] decoded = hashids.decode(noteId);
+        if (decoded.length == 0) {
+            return ResponseEntity.notFound().build();
         }
-        NoteRevision note = new NoteRevision(title, content);
-        boolean ok = repository.updateNote(decoded[0], note);
+        if (title.length() == 0 || content.length() == 0) {
+            return ResponseEntity.badRequest().build();
+        }
 
+        boolean ok = repository.updateNote(decoded[0], new NoteRevision(title, content));
         return ok ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @RequestMapping(value = "/notes/{noteId}/{revisionId}", method = RequestMethod.GET)
+    public ResponseEntity<Object> getNote(@PathVariable String noteId, @PathVariable Integer revisionId) {
+        long[] decoded = hashids.decode(noteId);
+        if (decoded.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        NoteRevision revision = repository.getNoteRevision(decoded[0], revisionId);
+        return revision == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(revision);
     }
 
     @RequestMapping(value = "/notes/{noteId}/history", method = RequestMethod.GET)
     public ResponseEntity<Object> getHistory(@PathVariable String noteId) {
-        long[] decoded;
-        if (noteId == null || (decoded = hashids.decode(noteId)).length == 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        long[] decoded = hashids.decode(noteId);
+        if (decoded.length == 0) {
+            return ResponseEntity.notFound().build();
         }
-        List<NoteRevision> notes = repository.getHistory(decoded[0]);
 
-        return ResponseEntity.ok(notes);
+        List<NoteRevision> notes = repository.getHistory(decoded[0]);
+        return notes == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(notes);
     }
 
     @RequestMapping(value = "/notes/{noteId}", method = RequestMethod.DELETE)

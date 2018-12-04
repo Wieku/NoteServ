@@ -25,7 +25,8 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     public List<NoteRevision> getHistory(long noteId) {
-        return manager.find(Note.class, noteId).getRevisions();
+        Note note = manager.find(Note.class, noteId);
+        return note == null ? null : note.getRevisions();
     }
 
     @Override
