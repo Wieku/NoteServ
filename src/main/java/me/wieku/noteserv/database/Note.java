@@ -1,6 +1,5 @@
 package me.wieku.noteserv.database;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -16,9 +15,6 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @CreationTimestamp
-    private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
     @OrderBy("revision_number ASC")
@@ -54,7 +50,7 @@ public class Note {
     }
 
     public LocalDateTime getCreationDate() {
-        return creationDate;
+        return revisions.get(0).getRevisionDate();
     }
 
     public LocalDateTime getModificationDate() {

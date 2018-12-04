@@ -20,7 +20,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     @Override
     public Note getNewestNote(long noteId) {
         Note note = manager.find(Note.class, noteId);
-        return note.isRemoved() ? null : note;
+        return note == null || note.isRemoved() ? null : note;
     }
 
     @Override
