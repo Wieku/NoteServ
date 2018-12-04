@@ -1,17 +1,18 @@
 package me.wieku.noteserv.view;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class NoteWithId extends NewestNote {
 
-    private String id;
+    private UUID id;
 
-    public NoteWithId(String id, String title, String content, LocalDateTime dateCreated, LocalDateTime dateModified) {
+    public NoteWithId(UUID id, String title, String content, LocalDateTime dateCreated, LocalDateTime dateModified) {
         super(title, content, dateCreated, dateModified);
         this.id = id;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 

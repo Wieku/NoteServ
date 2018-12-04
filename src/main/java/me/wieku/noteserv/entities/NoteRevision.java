@@ -16,7 +16,7 @@ public class NoteRevision {
     private int revisionNumber;
 
     @CreationTimestamp
-    private LocalDateTime timeStamp;
+    private LocalDateTime timestamp;
 
     private String title;
     private String content;
@@ -54,7 +54,7 @@ public class NoteRevision {
     }
 
     public LocalDateTime getRevisionDate() {
-        return timeStamp;
+        return timestamp;
     }
 
 }

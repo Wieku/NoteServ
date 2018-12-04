@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity(name = "Note")
 @Table(name = "notes")
@@ -13,8 +14,8 @@ import java.util.List;
 public class Note {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL)
     @OrderBy("revision_number ASC")
@@ -45,7 +46,7 @@ public class Note {
         return removed;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

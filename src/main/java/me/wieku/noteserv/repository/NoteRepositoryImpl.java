@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
@@ -21,19 +22,19 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     }
 
     @Override
-    public Note getNewestNote(long noteId) {
+    public Note getNewestNote(UUID noteId) {
         Note note = manager.find(Note.class, noteId);
         return note == null || note.isRemoved() ? null : note;
     }
 
     @Override
-    public List<NoteRevision> getHistory(long noteId) {
+    public List<NoteRevision> getHistory(UUID noteId) {
         Note note = manager.find(Note.class, noteId);
         return note == null ? null : note.getRevisions();
     }
 
     @Override
-    public NoteRevision getNoteRevision(long noteId, int revision) {
+    public NoteRevision getNoteRevision(UUID noteId, int revision) {
         Note note = manager.find(Note.class, noteId);
         if (note == null || note.isRemoved() || revision < 0 || revision >= note.getRevisions().size()) {
             return null;
@@ -50,7 +51,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     @Transactional
-    public boolean updateNote(long noteId, NoteRevision note) {
+    public boolean updateNote(UUID noteId, NoteRevision note) {
         Note mNote = manager.find(Note.class, noteId);
 
         if (mNote == null) {
@@ -64,7 +65,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     @Transactional
-    public boolean removeNote(long noteId) {
+    public boolean removeNote(UUID noteId) {
         Note note = manager.find(Note.class, noteId);
         if (note == null || note.isRemoved()) {
             return false;
