@@ -4,6 +4,7 @@ import me.wieku.noteserv.database.Note;
 import me.wieku.noteserv.database.NoteRepository;
 import me.wieku.noteserv.database.NoteRevision;
 import me.wieku.noteserv.view.NewestNote;
+import me.wieku.noteserv.view.NoteWithId;
 import org.hashids.Hashids;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class NoteController {
@@ -33,6 +35,36 @@ public class NoteController {
         UriComponents c = b.path("/notes/{id}").buildAndExpand(hashids.encode(note.getId()));
 
         return ResponseEntity.created(c.toUri()).build();
+    }
+
+    @RequestMapping(value = {"/notes"}, method = RequestMethod.GET)
+    public ResponseEntity<Object> getNotes() {
+        List<NoteWithId> notes = repository.getAll().stream().map(note -> new NoteWithId(hashids.encode(note.getId()), note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate())).collect(Collectors.toList());
+        return ResponseEntity.ok(notes);
+    }
+
+    @RequestMapping(value = {"/notes/{noteId}", "/notes/{noteId}/{revisionId}"}, method = RequestMethod.GET)
+    public ResponseEntity<Object> getNote(@PathVariable String noteId, @PathVariable(required = false) Integer revisionId) {
+        long[] decoded;
+        if (noteId == null || (decoded = hashids.decode(noteId)).length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (revisionId == null) {
+            Note note = repository.getNewestNote(decoded[0]);
+            if (note == null) {
+                return ResponseEntity.notFound().build();
+            } else {
+                return ResponseEntity.ok(new NewestNote(note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate()));
+            }
+        } else {
+            NoteRevision revision = repository.getNoteRevision(decoded[0], revisionId);
+            if (revision == null) {
+                return ResponseEntity.notFound().build();
+            } else {
+                return ResponseEntity.ok(revision);
+            }
+        }
     }
 
     @RequestMapping(value = "/notes/{noteId}", method = RequestMethod.PUT)
@@ -69,29 +101,4 @@ public class NoteController {
 
         return ok ? ResponseEntity.ok(null) : ResponseEntity.notFound().build();
     }
-
-    @RequestMapping(value = {"/notes/{noteId}", "/notes/{noteId}/{revisionId}"}, method = RequestMethod.GET)
-    public ResponseEntity<Object> getNote(@PathVariable String noteId, @PathVariable(required = false) Integer revisionId) {
-        long[] decoded;
-        if (noteId == null || (decoded = hashids.decode(noteId)).length == 0) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (revisionId == null) {
-            Note note = repository.getNewestNote(decoded[0]);
-            if (note == null) {
-                return ResponseEntity.notFound().build();
-            } else {
-                return ResponseEntity.ok(new NewestNote(note.getTitle(), note.getContent(), note.getCreationDate(), note.getModificationDate()));
-            }
-        } else {
-            NoteRevision revision = repository.getNoteRevision(decoded[0], revisionId);
-            if (revision == null) {
-                return ResponseEntity.notFound().build();
-            } else {
-                return ResponseEntity.ok(revision);
-            }
-        }
-    }
-
 }

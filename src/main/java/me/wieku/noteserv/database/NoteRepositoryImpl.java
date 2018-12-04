@@ -4,11 +4,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @PersistenceContext
     private EntityManager manager;
+
+    @Override
+    public List<Note> getAll() {
+        List<Note> notes = manager.createQuery("SELECT a FROM " + Note.class.getName() + " a").getResultList();
+        return notes.stream().filter(note -> !note.isRemoved()).collect(Collectors.toList());
+    }
 
     @Override
     public Note getNewestNote(long noteId) {
