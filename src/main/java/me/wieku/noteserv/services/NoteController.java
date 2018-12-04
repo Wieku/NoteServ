@@ -25,7 +25,7 @@ public class NoteController {
     @RequestMapping(value = "/notes", method = RequestMethod.POST)
     public ResponseEntity<Object> createNote(@RequestParam(value = "title") String title, @RequestParam(value = "content") String content, UriComponentsBuilder b) {
         if (title.length() == 0 || content.length() == 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+            return ResponseEntity.badRequest().build();
         }
         Note note = new Note(title, content);
         repository.addNote(note);
