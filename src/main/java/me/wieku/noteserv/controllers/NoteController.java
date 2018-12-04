@@ -1,8 +1,8 @@
-package me.wieku.noteserv.services;
+package me.wieku.noteserv.controllers;
 
-import me.wieku.noteserv.database.Note;
-import me.wieku.noteserv.database.NoteRepository;
-import me.wieku.noteserv.database.NoteRevision;
+import me.wieku.noteserv.entities.Note;
+import me.wieku.noteserv.repository.NoteRepository;
+import me.wieku.noteserv.entities.NoteRevision;
 import me.wieku.noteserv.view.NewestNote;
 import me.wieku.noteserv.view.NoteWithId;
 import org.hashids.Hashids;

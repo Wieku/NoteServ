@@ -1,4 +1,7 @@
-package me.wieku.noteserv.database;
+package me.wieku.noteserv.repository;
+
+import me.wieku.noteserv.entities.Note;
+import me.wieku.noteserv.entities.NoteRevision;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

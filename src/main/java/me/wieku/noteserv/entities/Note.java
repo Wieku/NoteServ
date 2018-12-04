@@ -1,4 +1,4 @@
-package me.wieku.noteserv.database;
+package me.wieku.noteserv.entities;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

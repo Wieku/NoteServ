@@ -1,4 +1,4 @@
-package me.wieku.noteserv.database;
+package me.wieku.noteserv.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 public class NoteRevision {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     private int revisionNumber;
 
     @CreationTimestamp
-    private LocalDateTime timestamp;
+    private LocalDateTime timeStamp;
 
     private String title;
     private String content;
@@ -54,7 +54,7 @@ public class NoteRevision {
     }
 
     public LocalDateTime getRevisionDate() {
-        return timestamp;
+        return timeStamp;
     }
 
 }
