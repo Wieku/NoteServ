@@ -8,22 +8,22 @@ import java.util.List;
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @PersistenceContext
-    private EntityManager em;
+    private EntityManager manager;
 
     @Override
     public Note getNewestNote(long noteId) {
-        Note note = em.find(Note.class, noteId);
+        Note note = manager.find(Note.class, noteId);
         return note.isRemoved() ? null : note;
     }
 
     @Override
     public List<NoteRevision> getHistory(long noteId) {
-        return em.find(Note.class, noteId).getRevisions();
+        return manager.find(Note.class, noteId).getRevisions();
     }
 
     @Override
     public NoteRevision getNoteRevision(long noteId, int revision) {
-        Note note = em.find(Note.class, noteId);
+        Note note = manager.find(Note.class, noteId);
         if (note == null || note.isRemoved() || revision < 0 || revision >= note.getRevisions().size()) {
             return null;
         }
@@ -33,22 +33,34 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     @Override
     @Transactional
     public void addNote(Note note) {
-        em.persist(note);
-        em.flush();
+        manager.persist(note);
+        manager.flush();
     }
 
     @Override
     @Transactional
-    public void updateNote(long noteId, NoteRevision note) {
-        Note mNote = em.find(Note.class, noteId);
+    public boolean updateNote(long noteId, NoteRevision note) {
+        Note mNote = manager.find(Note.class, noteId);
+
+        if (mNote == null) {
+            return false;
+        }
+
         mNote.addRevision(note.getTitle(), note.getContent());
-        em.flush();
+        manager.flush();
+        return true;
     }
 
     @Override
     @Transactional
-    public void removeNote(long noteId) {
-        em.find(Note.class, noteId).markAsRemoved();
-        em.flush();
+    public boolean removeNote(long noteId) {
+        Note note = manager.find(Note.class, noteId);
+        if (note == null || note.isRemoved()) {
+            return false;
+        }
+
+        note.markAsRemoved();
+        manager.flush();
+        return true;
     }
 }

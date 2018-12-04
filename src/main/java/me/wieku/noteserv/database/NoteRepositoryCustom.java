@@ -11,7 +11,7 @@ public interface NoteRepositoryCustom {
 
     void addNote(Note note);
 
-    void updateNote(long noteId, NoteRevision note);
+    boolean updateNote(long noteId, NoteRevision note);
 
-    void removeNote(long noteId);
+    boolean removeNote(long noteId);
 }
