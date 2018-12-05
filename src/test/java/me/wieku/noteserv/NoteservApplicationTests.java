@@ -10,12 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,43 +27,48 @@ public class NoteservApplicationTests {
     private MockMvc mockMvc;
 
     @Test
-    public void noteCreationAndGet_Successful() throws Exception {
+    public void shouldCreateNote() throws Exception {
+        mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated());
+    }
+
+    @Test
+    public void shouldCreateAndGetNote() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
     }
 
     @Test
-    public void noteCreationAndGet_Date_Match() throws Exception {
+    public void shouldDatesOfFreshlyCreatedNoteMatch() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         String response = mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andReturn().getResponse().getContentAsString();
         assertEquals(JsonPath.parse(response).read("$.dateCreated").toString(), JsonPath.parse(response).read("$.dateModified").toString());
     }
 
     @Test
-    public void noteCreation_MissingParams_BadRequest() throws Exception {
+    public void shouldReturnBadRequestOnMissingParamsInPostRequest() throws Exception {
         mockMvc.perform(post("/notes")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "foo")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("content", "bar")).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void noteCreation_EmptyParams_BadRequest() throws Exception {
+    public void shouldReturnBadRequestOnEmptyParamsInPostRequest() throws Exception {
         mockMvc.perform(post("/notes").param("title", "foo").param("content", "")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "").param("content", "bar")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "").param("content", "")).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void noteCreationAndUpdate_Successful() throws Exception {
+    public void shouldCreateAndUpdateNote() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
-        MvcResult result1 = mockMvc.perform(put(result.getResponse().getRedirectedUrl()).param("title", "foo1").param("content", "bar1")).andExpect(status().isNoContent()).andReturn();
+        mockMvc.perform(put(result.getResponse().getRedirectedUrl()).param("title", "foo1").param("content", "bar1")).andExpect(status().isNoContent());
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo1")).andExpect(jsonPath("$.content").value("bar1"));
     }
 
     @Test
-    public void noteCreationAndUpdate_MissingParams_BadRequest() throws Exception {
+    public void shouldReturnBadRequestOnMissingParamsInUpdateRequest() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -74,7 +78,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void noteCreationAndUpdate_EmptyParams_BadRequest() throws Exception {
+    public void shouldReturnBadRequestOnEmptyParamsInUpdateRequest() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -84,7 +88,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void noteCreationAndUpdate_HistoryCount_2() throws Exception {
+    public void shouldHistoryLengthBe2OnOneUpdate() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -93,17 +97,80 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void noteCreationAndUpdate_History_Correct() throws Exception {
+    public void shouldHistoryOfUpdatedNoteBeCorrect() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
-        mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
         mockMvc.perform(put(result.getResponse().getRedirectedUrl()).param("title", "foo1").param("content", "bar1")).andExpect(status().isNoContent());
+        mockMvc.perform(put(result.getResponse().getRedirectedUrl()).param("title", "2foo").param("content", "2bar")).andExpect(status().isNoContent());
+
         mockMvc.perform(get(result.getResponse().getRedirectedUrl().concat("/history")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].title").value("foo"))
                 .andExpect(jsonPath("$.[0].content").value("bar"))
                 .andExpect(jsonPath("$.[1].title").value("foo1"))
-                .andExpect(jsonPath("$.[1].content").value("bar1"));
+                .andExpect(jsonPath("$.[1].content").value("bar1"))
+                .andExpect(jsonPath("$.[2].title").value("2foo"))
+                .andExpect(jsonPath("$.[2].content").value("2bar"));
+    }
+
+    @Test
+    public void shouldDeleteNote() throws Exception {
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldHistoryOfDeletedNoteExist() throws Exception {
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl().concat("/history"))).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    public void shouldNotFoundDeletedNoteOnGet() throws Exception {
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundTheRevisionOfTheDeletedNote() throws Exception {
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl().concat("/0"))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundNonexistentNoteOnDelete() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        mockMvc.perform(delete("/notes/{noteId}", uuid)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundNonexistentNote() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        mockMvc.perform(get("/notes/{noteId}", uuid)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundTheRevisionOfNonexistentNote() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        mockMvc.perform(get("/notes/{noteId}/0", uuid)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundNonexistentNoteOnUpdate() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        mockMvc.perform(put("/notes/{noteId}", uuid).param("title", "foo1").param("content", "bar1")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundTheHistoryOfNonexistentNote() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        mockMvc.perform(get("/notes/{noteId}/history", uuid)).andExpect(status().isNotFound());
     }
 
 }
