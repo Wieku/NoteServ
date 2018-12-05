@@ -59,5 +59,9 @@ Successful execution will result in 201 HTTP status containing URL to the create
 ### Updating notes
 `curl -i -d "title=foo1&content=bar1" -X PUT http://host:port/notes/{id}`
 
+Successful execution will result in 204 HTTP status, 404 if note can't be found or if the note was deleted.
+
 ### Deleting notes
 `curl -i -X DELETE http://host:port/notes/{id}`
+
+Successful execution will result in 200 HTTP status, 404 if note can't be found or if the note was deleted.
