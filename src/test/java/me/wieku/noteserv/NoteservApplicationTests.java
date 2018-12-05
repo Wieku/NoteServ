@@ -153,6 +153,13 @@ public class NoteservApplicationTests {
     }
 
     @Test
+    public void shouldNotFoundDeletedNoteOnUpdateRequest() throws Exception {
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+        mockMvc.perform(put(result.getResponse().getRedirectedUrl()).param("title", "foo1").param("content", "bar1")).andExpect(status().isNotFound());
+    }
+
+    @Test
     public void shouldNotFoundNonexistentNoteOnDeleteRequest() throws Exception {
         UUID uuid = UUID.randomUUID();
         mockMvc.perform(delete("/notes/{noteId}", uuid)).andExpect(status().isNotFound());

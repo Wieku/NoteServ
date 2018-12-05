@@ -54,7 +54,7 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     public boolean updateNote(UUID noteId, NoteRevision note) {
         Note mNote = manager.find(Note.class, noteId);
 
-        if (mNote == null) {
+        if (mNote == null || mNote.isRemoved()) {
             return false;
         }
 
