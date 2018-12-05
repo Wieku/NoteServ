@@ -45,14 +45,14 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldReturnBadRequestOnMissingParamsInPostRequest() throws Exception {
+    public void shouldReturnBadRequestOnMissingParamsOnPostRequest() throws Exception {
         mockMvc.perform(post("/notes")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "foo")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("content", "bar")).andExpect(status().isBadRequest());
     }
 
     @Test
-    public void shouldReturnBadRequestOnEmptyParamsInPostRequest() throws Exception {
+    public void shouldReturnBadRequestOnEmptyParamsOnPostRequest() throws Exception {
         mockMvc.perform(post("/notes").param("title", "foo").param("content", "")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "").param("content", "bar")).andExpect(status().isBadRequest());
         mockMvc.perform(post("/notes").param("title", "").param("content", "")).andExpect(status().isBadRequest());
@@ -68,7 +68,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldReturnBadRequestOnMissingParamsInUpdateRequest() throws Exception {
+    public void shouldReturnBadRequestOnMissingParamsOnUpdateRequest() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -78,7 +78,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldReturnBadRequestOnEmptyParamsInUpdateRequest() throws Exception {
+    public void shouldReturnBadRequestOnEmptyParamsOnUpdateRequest() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -88,7 +88,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldHistoryLengthBe2OnOneUpdate() throws Exception {
+    public void shouldHistoryLengthBeTwoOnOneUpdate() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isOk()).andExpect(jsonPath("$.title").value("foo")).andExpect(jsonPath("$.content").value("bar"));
 
@@ -128,11 +128,20 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldNotFoundDeletedNoteOnGet() throws Exception {
+    public void shouldNotFoundDeletedNoteOnGetRequest() throws Exception {
         MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
         mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
 
         mockMvc.perform(get(result.getResponse().getRedirectedUrl())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldNotFoundDeletedNoteOnGetAllRequest() throws Exception {
+        int length = JsonPath.parse(mockMvc.perform(get("/notes")).andReturn().getResponse().getContentAsString()).read("$.length()");
+        MvcResult result = mockMvc.perform(post("/notes").param("title", "foo").param("content", "bar")).andExpect(status().isCreated()).andReturn();
+        mockMvc.perform(delete(result.getResponse().getRedirectedUrl())).andExpect(status().isOk());
+
+        mockMvc.perform(get("/notes")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(length));
     }
 
     @Test
@@ -144,7 +153,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldNotFoundNonexistentNoteOnDelete() throws Exception {
+    public void shouldNotFoundNonexistentNoteOnDeleteRequest() throws Exception {
         UUID uuid = UUID.randomUUID();
         mockMvc.perform(delete("/notes/{noteId}", uuid)).andExpect(status().isNotFound());
     }
@@ -162,7 +171,7 @@ public class NoteservApplicationTests {
     }
 
     @Test
-    public void shouldNotFoundNonexistentNoteOnUpdate() throws Exception {
+    public void shouldNotFoundNonexistentNoteOnUpdateRequest() throws Exception {
         UUID uuid = UUID.randomUUID();
         mockMvc.perform(put("/notes/{noteId}", uuid).param("title", "foo1").param("content", "bar1")).andExpect(status().isNotFound());
     }
