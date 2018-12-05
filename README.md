@@ -14,7 +14,7 @@ You can use the Windows installer, it will start the server automatically.
 #### Linux
 Download the `postgresql` package and start the service.
 
-###Creating the database
+### Creating the database
 
 You can add the database and user using additional tool called [pgAdmin](https://www.pgadmin.org/).
 
