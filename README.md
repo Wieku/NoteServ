@@ -18,6 +18,8 @@ Download the `postgresql` package and start the service.
 
 You can add the database and user using additional tool called [pgAdmin](https://www.pgadmin.org/).
 
+If you want to do it using a terminal, follow the steps below:
+
 On linux type: `sudo su postgres psql`
 
 On windows you would need to run `InstallationDir\scripts\runpsql.bat`
@@ -36,7 +38,7 @@ Database credentials and address configuration for application is located in `./
 #### Tests
 `./gradlew test`
 
-#### Spring application
+#### Application
 `./gradlew bootRun`
 
 ## Usage
